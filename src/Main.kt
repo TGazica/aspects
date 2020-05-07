@@ -8,7 +8,7 @@ fun main() {
     val deviceList = mutableListOf<List<String>>()
     val csvReader = BufferedReader(FileReader("arcore_devicelist.csv"))
 
-    var row: String = ""
+    var row = ""
     while (csvReader.readLine()?.also { row = it } != null) {
         val data = row.split(",")
         // do something with the data
@@ -31,8 +31,6 @@ fun main() {
         }
     }
     csvReader.close()
-
-    val phoneList = mutableListOf<Phone>()
 
     val phones = deviceList.map {
         Pair("${it[0]} ${it[1]}", it[6])
@@ -80,15 +78,36 @@ fun main() {
 
 }
 
-fun getAspectRatio(resolution: Pair<Int, Int>): String {
+fun getAspectRatio(resolution: Pair<Int, Double>): String {
     val hcf = getHcf(resolution)
 
-    return "${resolution.second/hcf}:${resolution.first/hcf}"
+    var w = resolution.second/hcf
+    var h = resolution.first/hcf
+
+    return when {
+        w > 100 -> {
+            w /= 10
+            h /= 10
+
+            "$w:$h"
+        }
+
+        w > 21 -> {
+            w/=2
+            "$w:$h"
+        }
+
+        else -> {
+            "${w.toInt()}:${h}"
+        }
+    }
+
+
 }
 
-fun getHcf(resolution: Pair<Int, Int>): Int {
+fun getHcf(resolution: Pair<Int, Double>): Int {
     var m = resolution.first
-    var n = resolution.second
+    var n = resolution.second.toInt()
 
     var temp: Int
     var reminder: Int
@@ -110,9 +129,9 @@ fun getHcf(resolution: Pair<Int, Int>): Int {
     }
 }
 
-fun splitResolution(resolution: String): Pair<Int, Int> {
+fun splitResolution(resolution: String): Pair<Int, Double> {
     val pair = resolution.split("x")
-    return Pair(pair.first().toInt(), pair.last().toInt())
+    return Pair(pair.first().toInt(), pair.last().toDouble())
 }
 
 data class Phone(
